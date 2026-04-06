@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Downloader</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>🎬 Video Downloader</h1>
+    <form id="downloadForm">
+        <input type="text" name="url" placeholder="Paste video URL here..." required>
+        <select name="format">
+            <option value="video">Video (Best)</option>
+            <option value="audio">Audio (MP3)</option>
+        </select>
+        <button type="submit">Download</button>
+    </form>
+    <p id="status"></p>
+</div>
+
+<script>
+const socket = io();
+const form = document.getElementById('downloadForm');
+const status = document.getElementById('status');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = "Starting download... ⏳";
+
+    const formData = new FormData(form);
+    await fetch("/download", { method: "POST", body: formData });
+});
+
+socket.on('progress', data => {
+    if (data.done) {
+        status.textContent = "Download finished ✅";
+    } else {
+        status.textContent = `Downloading: ${data.percent}`;
+    }
+});
+</script>
+</body>
+</html>
